@@ -11,6 +11,6 @@ Ce dépôt centralise tous les projets réalisés au cours de ma formation DevOp
 
 Chaque projet est organisé dans son propre dossier :
 
-- `Projet1/`
-- `Projet2/`
-- `Projet3/`
+- `Ansible/`
+- `Terraform/`
+- `Docker/`
