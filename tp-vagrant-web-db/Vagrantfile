@@ -1,0 +1,45 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  # VM 1 — Base de données
+  config.vm.define "db" do |db|
+    db.vm.box = "bento/debian-13"
+    db.vm.hostname = "db-server"
+    db.vm.network "private_network", ip: "192.168.56.11"
+
+    db.vm.provider "virtualbox" do |vb|
+      vb.name = "db-server"
+      vb.memory = 1024
+      vb.cpus = 1
+    end
+
+    db.vm.provision "shell", path: "db_provision.sh"
+  end
+
+  # VM 2 — Serveur Web
+  config.vm.define "web" do |web|
+    web.vm.box = "bento/debian-13"
+    web.vm.hostname = "web-server"
+    web.vm.network "private_network", ip: "192.168.56.10"
+
+    web.vm.network "forwarded_port",
+                   guest: 80,
+                   host: 8080,
+                   auto_correct: true
+
+    web.vm.synced_folder "./shared", "/var/www/html",
+                         owner: "www-data",
+                         group: "www-data",
+                         mount_options: ["dmode=755,fmode=644"]
+
+    web.vm.provider "virtualbox" do |vb|
+      vb.name = "web-server"
+      vb.memory = 1024
+      vb.cpus = 1
+    end
+
+    web.vm.provision "shell", path: "web_provision.sh"
+  end
+end
