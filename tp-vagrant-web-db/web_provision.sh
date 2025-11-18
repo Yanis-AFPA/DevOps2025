@@ -6,6 +6,8 @@ apt-get install -y apache2 php php-mysql libapache2-mod-php
 systemctl enable apache2
 systemctl restart apache2
 
+rm -f /var/www/html/index.html
+
 cat << 'EOF' > /var/www/html/index.php
 <?php
 $mysqli = new mysqli("192.168.56.11", "tp_user", "tp_password", "tp_db");
