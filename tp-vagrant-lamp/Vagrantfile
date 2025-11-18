@@ -1,0 +1,60 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # Box de base
+  config.vm.box = "bento/debian-13"
+  config.vm.hostname = "lamp-server"
+
+  # Port forwarding pour Apache
+  config.vm.network "forwarded_port", guest: 80, host: 7676, auto_correct: true
+
+  # Dossier partagé
+  config.vm.synced_folder "./shared", "/var/www/html",
+                          owner: "www-data",
+                          group: "www-data",
+                          mount_options: ["dmode=755,fmode=644"]
+
+  # Provider VirtualBox
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "lamp-server"
+    vb.memory = 1024
+    vb.cpus = 1
+    vb.gui = false
+  end
+
+  # Provisionnement
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update -y
+    apt-get install -y apache2 php php-cli libapache2-mod-php
+
+    systemctl enable apache2
+    systemctl restart apache2
+
+    rm -rf /var/www/html/*
+
+    cat << 'EOF' > /var/www/html/index.html
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <title>Vagrant LAMP</title>
+      <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f0f0; text-align: center; padding-top: 50px; }
+        h1 { color: #2c3e50; }
+        p { color: #34495e; }
+      </style>
+    </head>
+    <body>
+      <h1>Bonjour depuis Vagrant LAMP!</h1>
+      <p>Cette page est servie par Apache2 sur Debian 13</p>
+    </body>
+    </html>
+EOF
+
+    chown www-data:www-data /var/www/html/index.html
+
+    echo 'echo "Bienvenue sur la VM LAMP"' > /etc/profile.d/motd.sh
+    chmod +x /etc/profile.d/motd.sh
+  SHELL
+end
