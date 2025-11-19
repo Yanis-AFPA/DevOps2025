@@ -3,3 +3,6 @@
 
 # Log files
 *.log
+
+# Ignorer tout le contenu de shared
+shared/
