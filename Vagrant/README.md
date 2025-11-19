@@ -20,9 +20,8 @@ tp-vagrant/
 ├─ tp-vagrant-debian/      # Étape 1 : Debian base
 │   ├─ Vagrantfile
 │
-├─ tp-vagrant-lamp/        # Étape 2 : VM LAMP + dossier partagé
+├─ tp-vagrant-lamp/        # Étape 2 : VM LAMP
 │   ├─ Vagrantfile
-│   ├─ shared/             # Dossier monté dans /var/www/html
 │
 ├─ tp-vagrant-web-db/      # Étape 3 : Multi-VM Web + DB
 │   ├─ Vagrantfile
@@ -31,7 +30,6 @@ tp-vagrant/
 │   │   └─ web_provision.sh
 │   ├─ db_sql/
 │   │   └─ db_init.sql
-│   └─ shared/             # Dossier monté dans /var/www/html
 ```
 
 ---
