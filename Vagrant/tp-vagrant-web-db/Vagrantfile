@@ -9,10 +9,17 @@ Vagrant.configure("2") do |config|
     db.vm.hostname = "db-server"
     db.vm.network "private_network", ip: "192.168.56.11"
 
+    # Port pour accéder à phpMyAdmin
+    db.vm.network "forwarded_port",
+                     guest: 80,
+                     host: 8181, 
+                     auto_correct: true
+
     db.vm.provider "virtualbox" do |vb|
       vb.name = "db-server"
       vb.memory = 1024
       vb.cpus = 1
+      vb.gui = false
     end
 
     db.vm.provision "shell", path: "db_provision.sh"
@@ -39,6 +46,7 @@ Vagrant.configure("2") do |config|
       vb.name = "web-server"
       vb.memory = 1024
       vb.cpus = 1
+      vb.gui = false
     end
 
     web.vm.provision "shell", path: "web_provision.sh"
