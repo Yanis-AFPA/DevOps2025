@@ -1,11 +1,11 @@
 ---
-- name: Déploiement webapp
+- name: Déploiement app
   hosts: appservers
   become: true
   gather_facts: false
 
   vars:
-    html_dest: "/var/www/html"
+    app_dest: "/var/www/html"
 
   tasks:
     - name: Mise à jour
@@ -28,7 +28,28 @@
 
     # task git ici
 
+
+    - name: Ajout html par depot git
+      ansible.builtin.git:
+        repo: "https://github.com/Yanis-AFPA/app.git"
+        dest: "{{ app_dest }}"
+        version: "main"
+        force: true
+
+    - name: Donner les droits sur /var/www/html
+      ansible.builtin.file:
+        path: "{{ app_dest }}"
+        owner: www-data
+        group: www-data
+        state: directory
+        recurse: true
+
     - name: Vérif le status Apache
       ansible.builtin.systemd:
         name: apache2
         state: started
+      register: apache_status
+
+    - name: Afficher l'état du service Apache
+      ansible.builtin.debug:
+        msg: "Le service Apache est {{ apache_status.status.ActiveState }}"
