@@ -1,0 +1,22 @@
+Vagrant.configure("2") do |config|
+    config.vm.synced_folder '.', '/vagrant', disabled: true
+    config.ssh.insert_key = false # to use the global unsecure key instead of one insecure key per VM
+    config.vm.provider :virtualbox do |v|
+      v.memory = 512
+      v.cpus = 1
+    end
+
+    config.vm.define :ubu1 do |ubu1|
+      # Vagrant va récupérer une machine de base ubuntu 24.04
+      ubu1.vm.box = "bento/ubuntu-24.04"
+      ubu1.vm.hostname = "ubu1"
+      ubu1.vm.network :private_network, ip: "192.168.56.11"
+    end
+
+    config.vm.define :alma1 do |alma1|
+      # Vagrant va récupérer une machine de base almalinux 9 
+      alma1.vm.box = "bento/almalinux-9"
+      alma1.vm.hostname = "alma1"
+      alma1.vm.network :private_network, ip: "192.168.56.12"
+    end
+  end
