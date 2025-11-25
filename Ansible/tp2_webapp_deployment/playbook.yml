@@ -1,92 +1,9 @@
----
-- name: Déploiement app
-  hosts: appservers
+- name: Déployer l'infrastructure
+  hosts: all
   become: true
-  gather_facts: false
 
-  vars:
-    #  app_dest: "/var/www/html"
-    webapp_repo: "https://github.com/Yanis-AFPA/app.git"
-    webapp_dest: "/var/www/webapp"
-
-
-  tasks:
-    - name: Mise à jour
-      ansible.builtin.apt:
-        update_cache: true
-
-    - name: Installer Apache2 , Git et Mariadb
-      ansible.builtin.apt:
-        name:
-          - apache2
-          - git
-          - mariadb-server
-        state: present
-        update_cache: true
-
-    - name: Verif si MariaDB est démarré
-      ansible.builtin.systemd:
-        name: mariadb
-        state: started
-        enabled: true
-
-
-    #  - name: Supprimer l’index.html
-      #  ansible.builtin.file:
-        #  path: /var/www/html/index.html
-        #  state: absent
-
-    - name: Supprimer l'ancien répertoire webapp
-      ansible.builtin.file:
-        path: "{{ webapp_dest }}"
-        state: absent
-
-
-    - name: Créer le répertoire webapp
-      ansible.builtin.file:
-        path: "{{ webapp_dest }}"
-        state: directory
-        owner: "{{ ansible_user }}"  # utilisateur Ansible qui fait le déploiement
-        group: "{{ ansible_user }}"
-        mode: '0755'
-
-    - name: Ajout html par depot git
-      ansible.builtin.git:
-        repo: "{{ webapp_repo }}"
-        dest: "{{ webapp_dest }}"
-        version: "main"
-        force: true
-
-    - name: Donner les droits sur le repertoire #  avant /var/www/html
-      ansible.builtin.file:
-        path: "{{ webapp_dest }}"  #  avant /var/www/html
-        owner: www-data
-        group: www-data
-        state: directory
-        recurse: true
-
-    - name: Déployer le VirtualHost avec template
-      ansible.builtin.template:
-        src: virtualhost.conf.j2
-        dest: /etc/apache2/sites-available/000-default.conf
-        owner: root
-        group: root
-        mode: '0644'
-      notify: Restart Apache
-
-    - name: Vérif le status Apache
-      ansible.builtin.systemd:
-        name: apache2
-        state: started
-      register: apache_status
-
-    - name: Afficher l'état du service Apache
-      ansible.builtin.debug:
-        msg: "Le service Apache est {{ apache_status.status.ActiveState }}"
-
-
-  handlers:
-    - name: Restart Apache
-      ansible.builtin.service:
-        name: apache2
-        state: restarted
+  roles:
+    - role: db
+      when: "'dbservers' in group_names"
+    - role: web
+      when: "'webservers' in group_names"

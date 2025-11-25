@@ -1,0 +1,56 @@
+- name: Installer MariaDB
+  ansible.builtin.apt:
+    name:
+      - mariadb-server
+      - python3-pip
+      - python3-pymysql
+    state: present
+    update_cache: true
+
+- name: S'assurer que MariaDB est démarré
+  ansible.builtin.systemd:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: Modifier bind-address pour accepter les connexions distantes
+  ansible.builtin.lineinfile:
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    regexp: '^bind-address'
+    line: 'bind-address = 0.0.0.0'
+    state: present
+  notify: Restart MariaDB
+
+- name: Créer la base de données
+  community.mysql.mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    login_unix_socket: "{{ db_socket }}"
+    login_user: root
+
+- name: Créer l'utilisateur de la base
+  community.mysql.mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    host: "{{ db_host }}"
+    priv: "{{ db_name }}.*:ALL"
+    state: present
+    login_unix_socket: "{{ db_socket }}"
+    login_user: root
+
+
+- name: Copier le fichier SQL sur l'hôte
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/schema.sql"
+    dest: "{{ db_shema_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Importer le schéma SQL initial seulement si nécessaire
+  community.mysql.mysql_db:
+    name: "{{ db_name }}"
+    state: import
+    target: "{{ db_shema_path }}"
+    login_unix_socket: "{{ db_socket }}"
+    login_user: root

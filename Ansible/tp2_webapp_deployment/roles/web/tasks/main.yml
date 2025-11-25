@@ -1,0 +1,61 @@
+- name: Mise à jour des paquets
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Installer Apache2 et Git + PHP et extensions
+  ansible.builtin.apt:
+    name:
+      - apache2
+      - git
+      - php
+      - php-mysql
+      - libapache2-mod-php
+    state: present
+    update_cache: true
+
+- name: Supprimer l'ancien répertoire webapp
+  ansible.builtin.file:
+    path: "{{ web_app_dest }}"
+    state: absent
+
+- name: Créer le répertoire webapp
+  ansible.builtin.file:
+    path: "{{ web_app_dest }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+
+- name: Cloner la webapp depuis Git
+  ansible.builtin.git:
+    repo: "{{ web_app_repo }}"
+    dest: "{{ web_app_dest }}"
+    version: main
+    force: true
+
+- name: Déployer le VirtualHost Apache
+  ansible.builtin.template:
+    src: virtualhost.conf.j2
+    dest: /etc/apache2/sites-available/000-default.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Apache
+
+
+- name: Vérifier qu'Apache répond
+  ansible.builtin.uri:
+    url: http://localhost
+    return_content: true
+  register: web_apache_check
+
+- name: Debug statut HTTP Apache
+  ansible.builtin.debug:
+    msg: "Apache répond avec le code HTTP {{ web_apache_check.status }}"
+
+
+- name: Restart Apache
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
+  notify: Restart Apache

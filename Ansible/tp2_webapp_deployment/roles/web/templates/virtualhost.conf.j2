@@ -1,0 +1,6 @@
+<VirtualHost *:80>
+    DocumentRoot {{ web_app_dest }}
+
+    ErrorLog ${APACHE_LOG_DIR}/vhost_error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost_access.log combined
+</VirtualHost>

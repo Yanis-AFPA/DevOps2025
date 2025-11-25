@@ -1,0 +1,2 @@
+web_app_repo: "https://github.com/Yanis-AFPA/app.git"
+web_app_dest: "/var/www/webapp"

@@ -1,0 +1,6 @@
+db_name: covoit
+db_user: covoit_user
+db_password: motdepasse
+db_socket: /run/mysqld/mysqld.sock
+db_shema_path: /tmp/schema.sql
+db_host: 192.168.56.111
