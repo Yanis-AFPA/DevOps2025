@@ -1,0 +1,12 @@
+<VirtualHost *:80>
+    DocumentRoot {{ webapp_dest }}
+
+    <Directory {{ webapp_dest | default('/var/www/html') }}>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/vhost_error.log
+    CustomLog ${APACHE_LOG_DIR}/vhost_access.log combined
+</VirtualHost>
