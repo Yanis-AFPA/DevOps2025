@@ -3,3 +3,5 @@
 
 # Ignorer tous les dossiers .vagrant dans tous les sous-dossiers
 **/.vagrant/
+
+.ansible
