@@ -1,7 +1,4 @@
-- name: Mise à jour des paquets
-  ansible.builtin.apt:
-    update_cache: true
-
+---
 - name: Installer Apache2 et Git + PHP et extensions
   ansible.builtin.apt:
     name:
@@ -12,6 +9,13 @@
       - libapache2-mod-php
     state: present
     update_cache: true
+
+- name: Assurer que Apache est actif
+  ansible.builtin.service:
+    name: apache2
+    state: started
+    enabled: true
+
 
 - name: Supprimer l'ancien répertoire webapp
   ansible.builtin.file:
@@ -75,10 +79,3 @@
 - name: Debug statut HTTP Apache
   ansible.builtin.debug:
     msg: "Apache répond avec le code HTTP {{ web_apache_check.status }}"
-
-
-- name: Restart Apache
-  ansible.builtin.service:
-    name: apache2
-    state: restarted
-  notify: Restart Apache

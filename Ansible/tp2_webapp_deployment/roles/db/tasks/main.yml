@@ -32,7 +32,7 @@
   community.mysql.mysql_user:
     name: "{{ db_user }}"
     password: "{{ db_password }}"
-    host: "{{ db_host }}"
+    host: "%"
     priv: "{{ db_name }}.*:ALL"
     state: present
     login_unix_socket: "{{ db_socket }}"

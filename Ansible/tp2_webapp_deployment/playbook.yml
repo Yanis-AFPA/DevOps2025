@@ -1,9 +1,18 @@
-- name: Déployer l'infrastructure
+---
+- name: Configuration commune
   hosts: all
   become: true
-
   roles:
-    - role: db
-      when: "'dbservers' in group_names"
-    - role: web
-      when: "'webservers' in group_names"
+    - common
+
+- name: Déploiement web
+  hosts: webservers
+  become: true
+  roles:
+    - web
+
+- name: Déploiement base de données
+  hosts: dbservers
+  become: true
+  roles:
+    - db
