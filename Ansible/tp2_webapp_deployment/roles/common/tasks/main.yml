@@ -1,8 +1,8 @@
----
 - name: Mise à jour des paquets
   ansible.builtin.apt:
     update_cache: true
-
+  tags:
+    - update
 
 - name: Installer ufw
   ansible.builtin.apt:
@@ -10,7 +10,8 @@
       - ufw
     state: present
     update_cache: true
-
+  tags:
+    - install
 
 - name: Autoriser les ports nécessaires
   community.general.ufw:
@@ -18,8 +19,12 @@
     port: "{{ item }}"
     proto: tcp
   loop: "{{ common_firewall_port }}"
+  tags:
+    - firewall
 
 - name: Activer UFW
   community.general.ufw:
     state: enabled
     policy: deny
+  tags:
+    - firewall
