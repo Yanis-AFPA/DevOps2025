@@ -1,0 +1,8 @@
+client = yes
+debug = 7
+output = /var/log/stunnel.log
+
+
+[openvpn]
+accept = 127.0.0.1:{{ openvpn_local_port }}
+connect = {{ stunnel_server }}:{{ stunnel_port }}

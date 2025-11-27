@@ -10,6 +10,7 @@
   become: true
   roles:
     - web
+    - openvpn
 
 - name: Déploiement base de données
   hosts: dbservers

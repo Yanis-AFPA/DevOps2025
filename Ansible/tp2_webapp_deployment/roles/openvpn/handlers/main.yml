@@ -1,0 +1,11 @@
+- name: restart stunnel
+  service:
+    name: stunnel4
+    state: restarted
+    enabled: yes
+
+- name: restart openvpn
+  service:
+    name: openvpn-client@client
+    state: restarted
+    enabled: yes
