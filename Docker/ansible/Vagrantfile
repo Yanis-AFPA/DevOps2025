@@ -1,0 +1,15 @@
+Vagrant.configure("2") do |config|
+    config.vm.synced_folder './partage_vagrant', '/vagrant', disabled: false, create: true # >
+    config.ssh.insert_key = false # to use the global unsecure key instead of o>
+    config.vm.provider :virtualbox do |v|
+      v.memory = 4096
+      v.cpus = 4
+    end
+
+    config.vm.define :ubudock1 do |ubudock1|
+      # Vagrant va récupérer une machine de base ubuntu 24.04
+      ubudock1.vm.box = "bento/ubuntu-24.04"
+      ubudock1.vm.hostname = "ubudock1"
+      ubudock1.vm.network :private_network, ip: "192.168.56.123"
+    end
+end
