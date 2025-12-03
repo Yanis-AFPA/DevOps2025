@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':note' => $_POST['note'] ?: null,
                         ':description' => $_POST['description']
                     ]);
-                    // Redirection après ajout
                     header('Location: index.php?success=create');
                     exit();
                     break;
@@ -70,7 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':description' => $_POST['description'],
                         ':id' => $_POST['id']
                     ]);
-                    // Redirection après modification
                     header('Location: index.php?success=update');
                     exit();
                     break;
@@ -79,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // DELETE - Suppression d'un jeu
                     $stmt = $pdo->prepare("DELETE FROM jeux WHERE id = :id");
                     $stmt->execute([':id' => $_POST['id']]);
-                    // Redirection après suppression
                     header('Location: index.php?success=delete');
                     exit();
                     break;
@@ -132,7 +129,54 @@ $genres = ['Action', 'Aventure', 'RPG', 'FPS', 'Stratégie', 'Sport', 'Course', 
             </div>
         <?php endif; ?>
 
-        <!-- Formulaire d'ajout/modification -->
+        <!-- COLLECTION DE JEUX EN HAUT -->
+        <h2>📚 Collection de jeux (<?php echo count($jeux); ?>)</h2>
+        <?php if (count($jeux) > 0): ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Plateforme</th>
+                        <th>Genre</th>
+                        <th>Année</th>
+                        <th>Note</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($jeux as $jeu): ?>
+                    <tr>
+                        <td><strong><?php echo htmlspecialchars($jeu['titre']); ?></strong></td>
+                        <td><?php echo htmlspecialchars($jeu['plateforme']); ?></td>
+                        <td><?php echo htmlspecialchars($jeu['genre']); ?></td>
+                        <td><?php echo $jeu['annee_sortie'] ?: '-'; ?></td>
+                        <td><?php echo $jeu['note'] ? $jeu['note'] . '/10 ⭐' : '-'; ?></td>
+                        <td>
+                            <div class="actions">
+                                <a href="?edit=<?php echo $jeu['id']; ?>">
+                                    <button class="btn-edit">✏️ Modifier</button>
+                                </a>
+                                <form method="POST" style="display: inline;" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer le jeu \'<?php echo htmlspecialchars($jeu['titre']); ?>\' ?');">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="<?php echo $jeu['id']; ?>">
+                                    <button type="submit" class="btn-delete">🗑️ Supprimer</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <div class="empty-state">
+                <p>🎮 Aucun jeu dans la collection.</p>
+                <p>Ajoutez votre premier jeu avec le formulaire ci-dessous !</p>
+            </div>
+        <?php endif; ?>
+        <!-- FIN COLLECTION -->
+
+        <!-- FORMULAIRE D'AJOUT/MODIFICATION -->
         <div class="form-section">
             <h2><?php echo $editMode ? '✏️ Modifier un jeu' : '➕ Ajouter un nouveau jeu'; ?></h2>
             <form method="POST" action="">
@@ -220,53 +264,8 @@ $genres = ['Action', 'Aventure', 'RPG', 'FPS', 'Stratégie', 'Sport', 'Course', 
                 </div>
             </form>
         </div>
+        <!-- FIN FORMULAIRE -->
 
-        <!-- Liste des jeux -->
-        <h2>📚 Collection de jeux (<?php echo count($jeux); ?>)</h2>
-        
-        <?php if (count($jeux) > 0): ?>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Titre</th>
-                        <th>Plateforme</th>
-                        <th>Genre</th>
-                        <th>Année</th>
-                        <th>Note</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($jeux as $jeu): ?>
-                    <tr>
-                        <td><strong><?php echo htmlspecialchars($jeu['titre']); ?></strong></td>
-                        <td><?php echo htmlspecialchars($jeu['plateforme']); ?></td>
-                        <td><?php echo htmlspecialchars($jeu['genre']); ?></td>
-                        <td><?php echo $jeu['annee_sortie'] ?: '-'; ?></td>
-                        <td><?php echo $jeu['note'] ? $jeu['note'] . '/10 ⭐' : '-'; ?></td>
-                        <td>
-                            <div class="actions">
-                                <a href="?edit=<?php echo $jeu['id']; ?>">
-                                    <button class="btn-edit">✏️ Modifier</button>
-                                </a>
-                                <form method="POST" style="display: inline;" 
-                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer le jeu \'<?php echo htmlspecialchars($jeu['titre']); ?>\' ?');">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<?php echo $jeu['id']; ?>">
-                                    <button type="submit" class="btn-delete">🗑️ Supprimer</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else: ?>
-            <div class="empty-state">
-                <p>🎮 Aucun jeu dans la collection.</p>
-                <p>Ajoutez votre premier jeu avec le formulaire ci-dessus !</p>
-            </div>
-        <?php endif; ?>
     </div>
 </body>
 </html>
