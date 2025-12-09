@@ -1,188 +1,90 @@
 #!/usr/bin/env bash
-#
-# ci-build-and-push-final.sh
-#
-# Script CI/CD simplifié pour Harbor :
-#  - Détection automatique de l'environnement (prod/dev/other)
-#  - Gestion version incrémentale
-#  - Tag Docker cohérent, avec option --fix
-#  - Build et push Docker
-#  - Trivy géré par Harbor (scan après push)
-#
 set -euo pipefail
-IFS=$'\n\t'
 
-# ---------------------------
+# ----------------------------------------
 # Fonctions utilitaires
-# ---------------------------
-log()   { printf '\e[1;34m[INFO]\e[0m %s\n' "$*"; }
-warn()  { printf '\e[1;33m[WARN]\e[0m %s\n' "$*" >&2; }
-err()   { printf '\e[1;31m[ERROR]\e[0m %s\n' "$*" >&2; exit 1; }
-die()   { err "$*"; }
+# ----------------------------------------
+log()  { echo -e "[INFO] $*"; }
+warn() { echo -e "[WARN] $*" >&2; }
+die()  { echo -e "[ERROR] $*" >&2; exit 1; }
 
-usage() {
-  cat <<EOF
-Usage: $0 [options]
+# ----------------------------------------
+# Configuration
+# ----------------------------------------
+PROJECT="automatiser_build"
+REGISTRY="localhost:80"
 
-Options:
-  --fix                    : marque le tag comme 'fix' (suffixe -fix)
-  --registry REG           : Harbor registry (ex: harbor.example.com)
-  --project PROJ           : Harbor project (ex: myproject)
-  --repo REPO              : Repository name (ex: myapp)
-  --version-file PATH      : fichier version (default: VERSION)
-  --dockerfile PATH        : Dockerfile (default: Dockerfile)
-  --no-push                : ne pas push vers Harbor (tests locaux)
-  --commit-version         : commit local du bump de version
-  -h, --help               : affiche cette aide
+# Robot account Harbor
+HARBOR_USER='robot$robot'
+HARBOR_API_TOKEN="XAfc4wezaACkcdkEnYDE1H74cUOYMhCo"
 
-EOF
-  exit 1
-}
-
-# ---------------------------
-# Parse args
-# ---------------------------
-FIX_TAG=false
-REGISTRY="${HARBOR_REGISTRY:-}"
-PROJECT="${HARBOR_PROJECT:-}"
-REPO="${HARBOR_REPO:-}"
-VERSION_FILE="VERSION"
-DOCKERFILE="Dockerfile"
+# Pas de push si --no-push
 NO_PUSH=false
-COMMIT_VERSION=false
+if [[ "${1:-}" == "--no-push" ]]; then NO_PUSH=true; fi
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --fix) FIX_TAG=true; shift ;;
-    --registry) REGISTRY="$2"; shift 2 ;;
-    --project) PROJECT="$2"; shift 2 ;;
-    --repo) REPO="$2"; shift 2 ;;
-    --version-file) VERSION_FILE="$2"; shift 2 ;;
-    --dockerfile) DOCKERFILE="$2"; shift 2 ;;
-    --no-push) NO_PUSH=true; shift ;;
-    --commit-version) COMMIT_VERSION=true; shift ;;
-    -h|--help) usage ;;
-    *) die "Option inconnue: $1";;
-  esac
-done
+# ----------------------------------------
+# Extraction Git
+# ----------------------------------------
+GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+GIT_COMMIT=$(git rev-parse --short HEAD)
+GIT_COMMIT_FULL=$(git rev-parse HEAD)
+GIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M:%S %z')
 
-# ---------------------------
-# Pré-requis
-# ---------------------------
-command -v git >/dev/null 2>&1 || die "git introuvable."
-command -v docker >/dev/null 2>&1 || die "docker introuvable."
-[[ -f "$DOCKERFILE" ]] || die "Dockerfile introuvable: $DOCKERFILE"
+log "Git: branch=$GIT_BRANCH commit=$GIT_COMMIT ($GIT_COMMIT_FULL) date='$GIT_DATE'"
 
-# Si push activé, registry/project/repo requis
-if ! $NO_PUSH; then
-  : "${REGISTRY:?Registry Harbor requis}"
-  : "${PROJECT:?Harbor project requis}"
-  : "${REPO:?Harbor repo requis}"
-fi
+# ----------------------------------------
+# Gestion version
+# ----------------------------------------
+VERSION_FILE="VERSION"
 
-# ---------------------------
-# Infos Git
-# ---------------------------
-git_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
-[[ -n "$git_root" ]] || die "Ce script doit être exécuté depuis un dépôt git."
-cd "$git_root"
-
-commit_short=$(git rev-parse --short HEAD)
-commit_long=$(git rev-parse HEAD)
-commit_date=$(git show -s --format=%ci HEAD)
-branch_name=$(git rev-parse --abbrev-ref HEAD)
-
-log "Git: branch=$branch_name commit=$commit_short ($commit_long) date='$commit_date'"
-
-# ---------------------------
-# Détection environnement prod/dev/other
-# ---------------------------
-branch_lower=${branch_name,,}  # lowercase
-case "$branch_lower" in
-    main|master|prod|production|release*)
-        ENV_TYPE="prod"
-        ;;
-    dev|develop|development)
-        ENV_TYPE="dev"
-        ;;
-    *)
-        ENV_TYPE="other"
-        ;;
-esac
-log "Environnement détecté: $ENV_TYPE"
-
-# ---------------------------
-# Version incrémentale
-# ---------------------------
 if [[ ! -f "$VERSION_FILE" ]]; then
-  log "Fichier version introuvable ($VERSION_FILE). Création initiale 1.0"
-  echo "1.0" > "$VERSION_FILE"
+    echo "1.0" > "$VERSION_FILE"
 fi
 
-current_version=$(<"$VERSION_FILE")
-if ! [[ "$current_version" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-  warn "Version actuelle '$current_version' invalide. Réinitialisation à 1.0"
-  current_version="1.0"
-fi
+OLD_VERSION=$(cat "$VERSION_FILE")
+NEW_VERSION=$(awk -F. '{printf "%d.%d", $1, $2+1}' VERSION)
 
-next_version=$(awk -v v="$current_version" 'BEGIN{printf("%.1f", v+0.1)}')
-echo "$next_version" > "$VERSION_FILE"
-log "Version mise à jour: $current_version -> $next_version"
+echo "$NEW_VERSION" > "$VERSION_FILE"
+log "Version mise à jour: $OLD_VERSION -> $NEW_VERSION"
 
-$COMMIT_VERSION && git add "$VERSION_FILE" && git commit -m "Bump version to $next_version [ci-script]" || true
-
-# ---------------------------
+# ----------------------------------------
 # Tags Docker
-# ---------------------------
-branch_safe=$(echo "$branch_name" | sed 's#[/:]#-#g' | tr '[:upper:]' '[:lower:]')
-date_tag=$(date -u +"%Y%m%dT%H%M%SZ")
-fix_suffix=""
-$FIX_TAG && fix_suffix="-fix"
-
-image_base="${REGISTRY}/${PROJECT}/${REPO}"
-tag_body="${ENV_TYPE}${fix_suffix}-v${next_version}-${branch_safe}-${date_tag}-${commit_short}"
-full_tag="${image_base}:${tag_body}"
-latest_tag="${image_base}:latest"
+# ----------------------------------------
+timestamp=$(date +%Y%m%d%H%M%S)
+full_tag="${PROJECT}-v${NEW_VERSION}-${GIT_COMMIT}-${timestamp}"
+latest_tag="${PROJECT}-latest"
 
 log "Tags générés: full_tag=$full_tag latest_tag=$latest_tag"
 
-# ---------------------------
+# ----------------------------------------
 # Build Docker
-# ---------------------------
+# ----------------------------------------
 log "Construction image Docker..."
-docker build -f "$DOCKERFILE" -t "$full_tag" -t "$latest_tag" . || die "Docker build a échoué."
+docker build -t "$full_tag" -t "$latest_tag" . || die "Build Docker échoué"
 log "Build terminé."
 
-# ---------------------------
+# ----------------------------------------
 # Push vers Harbor
-# ---------------------------
+# ----------------------------------------
 if ! $NO_PUSH; then
-  log "Push de l'image vers Harbor..."
-  docker push "$full_tag" || warn "Push échoué pour $full_tag"
-  docker push "$latest_tag" || warn "Push échoué pour $latest_tag"
-  log "Push terminé."
+    log "Authentification à Harbor..."
+
+    docker login "$REGISTRY" \
+        -u "$HARBOR_USER" \
+        -p "$HARBOR_API_TOKEN" \
+        >/dev/null 2>&1 || die "Docker login échoué"
+
+    full_tag_registry="${REGISTRY}/${PROJECT}/${full_tag}"
+    latest_tag_registry="${REGISTRY}/${PROJECT}/${latest_tag}"
+
+    docker tag "$full_tag" "$full_tag_registry"
+    docker tag "$latest_tag" "$latest_tag_registry"
+
+    log "Push de l'image vers Harbor..."
+    docker push "$full_tag_registry" || warn "Push échoué pour $full_tag_registry"
+    docker push "$latest_tag_registry" || warn "Push échoué pour $latest_tag_registry"
+
+    log "Push terminé."
 else
-  warn "Push désactivé (--no-push). Images locales uniquement."
+    warn "Push désactivé (--no-push)."
 fi
-
-# ---------------------------
-# Résumé final
-# ---------------------------
-cat <<EOF
-
-=== RÉSUMÉ ===
-Repository: $git_root
-Branch: $branch_name
-Commit: $commit_short ($commit_long)
-Commit date: $commit_date
-Environnement: $ENV_TYPE
-Version fichier: $next_version
-Image construite: $full_tag
-Image latest: $latest_tag
-Push: $( $NO_PUSH && echo "NON (no-push)" || echo "OUI -> $REGISTRY/$PROJECT/$REPO" )
-Harbor gère automatiquement le scan Trivy après push.
-
-EOF
-
-log "Script terminé."
-exit 0
