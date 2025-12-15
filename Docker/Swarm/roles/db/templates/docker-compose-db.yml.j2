@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: afpabike-db
+    environment:
+      MYSQL_ROOT_PASSWORD: {{ db_root_password }}
+      MYSQL_DATABASE: {{ db_name }}
+      MYSQL_USER: {{ db_user }}
+      MYSQL_PASSWORD: {{ db_password }}
+    volumes:
+      - {{ db_data_dir }}:/var/lib/mysql
+      - {{ db_init_dir }}/Crebas_AfpaBike.sql:/docker-entrypoint-initdb.d/Crebas_AfpaBike.sql:ro
+    ports:
+      - "3306:3306"
+    restart: always

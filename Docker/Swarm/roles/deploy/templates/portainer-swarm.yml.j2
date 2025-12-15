@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - portainer_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - web
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.portainer.rule=Host(`portainer.local`)"
+        - "traefik.http.routers.portainer.entrypoints=websecure"
+        - "traefik.http.routers.portainer.tls.certresolver=selfsigned"
+        - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+        # Redirection HTTP → HTTPS
+        - "traefik.http.routers.portainer-http.rule=Host(`portainer.local`)"
+        - "traefik.http.routers.portainer-http.entrypoints=web"
+        - "traefik.http.routers.portainer-http.middlewares=https-redirect"
+        - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      placement:
+        constraints:
+          - node.role == manager
+
+volumes:
+  portainer_data:
+
+networks:
+  web:
+    external: true

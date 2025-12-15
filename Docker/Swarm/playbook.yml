@@ -1,0 +1,30 @@
+- name: Install Docker on all nodes
+  hosts: all
+  become: true
+  roles:
+    - geerlingguy.docker
+    - harbor
+
+- name: Prepare the database
+  hosts: db
+  become: true
+  roles:
+    - db
+
+- name: Initialize Swarm manager
+  hosts: swarm_manager
+  become: true
+  roles:
+    - swarm_manager
+
+- name: Join workers to Swarm
+  hosts: swarm_workers
+  become: true
+  roles:
+    - swarm_worker
+
+- name: Deploy PHP stack on manager
+  hosts: swarm_manager
+  become: true
+  roles:
+    - deploy

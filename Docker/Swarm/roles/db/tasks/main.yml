@@ -1,0 +1,28 @@
+- name: Ensure DB directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - "{{ db_data_dir }}"
+    - "{{ db_init_dir }}"
+    - "{{ db_compose_dir }}"
+
+- name: Copy SQL initialization file
+  copy:
+    src: Crebas_AfpaBike_v1-1_with_values.sql
+    dest: "{{ db_init_dir }}/Crebas_AfpaBike.sql"
+    mode: '0644'
+
+- name: Deploy docker-compose template
+  template:
+    src: docker-compose-db.yml.j2
+    dest: "{{ db_compose_dir }}/docker-compose.yml"
+    mode: '0644'
+
+- name: Start/Update MySQL container
+  command: docker compose up -d
+  args:
+    chdir: "{{ db_compose_dir }}"

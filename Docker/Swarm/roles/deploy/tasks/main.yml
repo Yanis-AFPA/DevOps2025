@@ -1,0 +1,73 @@
+- name: Ensure /opt/afpabike directory exists
+  ansible.builtin.file:
+    path: /opt/afpabike
+    state: directory
+    mode: '0755'
+
+- name: Generate docker-compose Swarm from template
+  ansible.builtin.template:
+    src: docker-compose-swarm.yml.j2
+    dest: /opt/afpabike/docker-compose-swarm.yml
+    mode: '0644'
+
+- name: Ensure /opt/portainer directory exists
+  ansible.builtin.file:
+    path: /opt/portainer
+    state: directory
+    mode: '0755'
+
+- name: Generate Portainer stack from template
+  ansible.builtin.template:
+    src: portainer-swarm.yml.j2
+    dest: /opt/portainer/portainer-swarm.yml
+    mode: '0644'
+  vars:
+    enable_agent: true
+
+- name: Create certs directory
+  file:
+    path: "{{ traefik_cert_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Generate self-signed certificate if missing
+  command: >
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048
+    -keyout {{ traefik_cert_dir }}/traefik.key
+    -out {{ traefik_cert_dir }}/traefik.crt
+    -subj "/CN={{ traefik_domain }}"
+  args:
+    creates: "{{ traefik_cert_dir }}/traefik.crt"
+
+- name: Create Traefik directory
+  file:
+    path: /opt/traefik
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Copy Traefik stack template
+  template:
+    src: traefik-swarm.yml.j2
+    dest: /opt/traefik/traefik-swarm.yml
+    mode: '0644'
+  become: true
+
+- name: Créer le réseau overlay Traefik
+  community.docker.docker_network:
+    name: web
+    driver: overlay
+    attachable: true
+    state: present
+  run_once: true
+
+- name: Deploy Traefik stack
+  command: docker stack deploy -c /opt/traefik/traefik-swarm.yml traefik
+
+- name: Deploy the stack
+  ansible.builtin.command: docker stack deploy -c /opt/afpabike/docker-compose-swarm.yml {{ stack_name }}
+
+- name: Deploy Portainer stack
+  ansible.builtin.command: docker stack deploy -c /opt/portainer/portainer-swarm.yml portainer

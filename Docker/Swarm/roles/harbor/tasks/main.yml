@@ -1,0 +1,29 @@
+- name: Ensure daemon.json has correct permissions
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "insecure-registries": ["10.20.63.2"]
+      }
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Ensure vagrant user is in docker group
+  ansible.builtin.user:
+    name: vagrant
+    groups: docker
+    append: true
+
+
+- name: Reload systemd and restart Docker
+  ansible.builtin.systemd:
+    name: docker
+    daemon_reload: true
+    state: restarted
+
+- name: Ensure Docker login to Harbor
+  community.docker.docker_login:
+    registry_url: "10.20.63.2"
+    username: admin
+    password: Password34

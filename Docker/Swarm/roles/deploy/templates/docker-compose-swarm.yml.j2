@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  php:
+    image: {{ php_image }}
+    environment:
+      DB_HOST: {{ db_host }}
+      DB_USER: {{ db_user }}
+      DB_PASSWORD: {{ db_password }}
+      DB_NAME: {{ db_name }}
+    networks:
+      - web
+    deploy:
+      replicas: {{ php_replicas }}
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.afpabike.rule=Host(`afpabike.local`)"
+        - "traefik.http.routers.afpabike.entrypoints=websecure"
+        - "traefik.http.routers.afpabike.tls.certresolver=selfsigned"
+        - "traefik.http.services.afpabike.loadbalancer.server.port=80"
+        # Redirection HTTP → HTTPS
+        - "traefik.http.routers.afpabike-http.rule=Host(`afpabike.local`)"
+        - "traefik.http.routers.afpabike-http.entrypoints=web"
+        - "traefik.http.routers.afpabike-http.middlewares=https-redirect"
+        - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      placement:
+        constraints:
+          - node.role == worker
+
+networks:
+  web:
+    external: true

@@ -5,3 +5,4 @@
 **/.vagrant/
 
 .ansible
+Docker/Swarm/app

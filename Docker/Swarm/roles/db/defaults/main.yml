@@ -1,0 +1,8 @@
+db_root_password: root
+db_name: gestion_afpabike_db
+db_user: afpabike
+db_password: afpabike
+
+db_data_dir: /opt/db-data
+db_init_dir: /opt/initdb
+db_compose_dir: /opt/db-compose

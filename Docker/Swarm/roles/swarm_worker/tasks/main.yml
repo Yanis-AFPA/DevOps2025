@@ -1,0 +1,13 @@
+- name: Check if node is already part of a swarm
+  ansible.builtin.shell: docker info --format '{{"{{.Swarm.LocalNodeState}}"}}' || echo "inactive"
+  register: swarm_worker_status
+  changed_when: false
+
+
+- name: Join Docker Swarm if not already part of one
+  ansible.builtin.shell: >
+    docker swarm join --token {{ hostvars['swarm-manager']['swarm_manager_worker_token'] }} 192.168.56.150:2377
+  when: swarm_worker_status.stdout != "active"
+  register: swarm_worker_join
+  changed_when: "'This node joined a swarm' in swarm_worker_join.stdout"
+  failed_when: swarm_worker_join.rc != 0 and "'This node joined a swarm' not in swarm_worker_join.stdout"

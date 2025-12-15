@@ -1,0 +1,16 @@
+stack_name: afpabike
+php_image: 10.20.63.2/server-dev-php-mysql/afpabike:latest
+db_host: 192.168.56.153
+db_user: afpabike
+db_password: afpabike
+db_name: gestion_afpabike_db
+php_replicas: 2
+
+traefik_stack_name: traefik
+traefik_network: web
+traefik_cert_dir: /opt/traefik/certs
+traefik_email: your@email.local
+traefik_dashboard_hash: "admin:$$apr1$$..."  # htpasswd hashed
+traefik_domain: traefik.local
+traefik_image: traefik:v3.4
+traefik_replicas: 1
