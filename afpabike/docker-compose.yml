@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  php:
+    build: .
+    ports:
+      - "8090:80"
+    depends_on:
+      - mysql
+    volumes:
+      - ./app:/var/www
+
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gestion_afpabike_db
+      MYSQL_USER: afpabike
+      MYSQL_PASSWORD: afpabike
+    volumes:
+      - ./db-data:/var/lib/mysql
+      - ./Crebas_AfpaBike_v1-1_with_values.sql:/docker-entrypoint-initdb.d/Crebas_AfpaBike_v1-1_with_values.sql:ro
+    ports:
+      - "3306:3306"
+
+
+
