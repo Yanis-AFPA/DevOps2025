@@ -1,0 +1,7 @@
+---
+- name: Déployer l'application AFPABike
+  hosts: vcenter_vms
+  become: yes
+
+  roles:
+    - afpabike_docker
