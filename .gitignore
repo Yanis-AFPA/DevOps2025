@@ -6,3 +6,12 @@
 
 .ansible
 Docker/Swarm/app
+# Gemini Tests - Venv and Secrets
+python/gemini-tests/bin/
+python/gemini-tests/lib/
+python/gemini-tests/lib64/
+python/gemini-tests/include/
+python/gemini-tests/share/
+python/gemini-tests/pyvenv.cfg
+python/gemini-tests/.env
+python/gemini-tests/__pycache__/

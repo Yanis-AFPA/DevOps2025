@@ -1,0 +1,55 @@
+Jan 06 06:55:01 fw sshd[1021]: Failed password for invalid user admin from 185.220.101.1 port 51231 ssh2
+Jan 06 06:55:03 fw sshd[1021]: Failed password for invalid user admin from 185.220.101.1 port 51232 ssh2
+Jan 06 06:55:06 fw sshd[1021]: Failed password for invalid user admin from 185.220.101.1 port 51233 ssh2
+Jan 06 06:55:10 fw sshd[1021]: Failed password for root from 185.220.101.1 port 51234 ssh2
+Jan 06 06:55:14 fw sshd[1021]: Failed password for root from 185.220.101.1 port 51235 ssh2
+ 
+Jan 06 06:56:02 fw kernel: IN=em0 OUT= MAC= SRC=45.155.205.10 DST=192.168.1.10 LEN=60
+Jan 06 06:56:04 fw kernel: IN=em0 OUT= MAC= SRC=45.155.205.10 DST=192.168.1.10 LEN=60
+Jan 06 06:56:06 fw kernel: IN=em0 OUT= MAC= SRC=45.155.205.10 DST=192.168.1.10 LEN=60
+Jan 06 06:56:08 fw kernel: IN=em0 OUT= MAC= SRC=45.155.205.10 DST=192.168.1.10 LEN=60
+ 
+Jan 06 06:57:11 fw nginx: 198.51.100.77 - - "GET /wp-login.php HTTP/1.1" 404 153 "-" "Mozilla/5.0"
+Jan 06 06:57:12 fw nginx: 198.51.100.77 - - "POST /wp-login.php HTTP/1.1" 403 169 "-" "Mozilla/5.0"
+Jan 06 06:57:13 fw nginx: 198.51.100.77 - - "GET /xmlrpc.php HTTP/1.1" 403 112 "-" "Mozilla/5.0"
+ 
+Jan 06 06:58:01 fw sshd[1045]: Failed password for invalid user oracle from 103.130.219.55 port 60122 ssh2
+Jan 06 06:58:03 fw sshd[1045]: Failed password for invalid user oracle from 103.130.219.55 port 60123 ssh2
+Jan 06 06:58:05 fw sshd[1045]: Failed password for invalid user oracle from 103.130.219.55 port 60124 ssh2
+ 
+Jan 06 06:59:10 fw suricata: Alert ET SCAN NMAP from 89.248.165.16 to 192.168.1.20
+Jan 06 06:59:12 fw suricata: Alert ET SCAN NMAP from 89.248.165.16 to 192.168.1.20
+Jan 06 06:59:14 fw suricata: Alert ET SCAN NMAP from 89.248.165.16 to 192.168.1.20
+ 
+Jan 06 07:00:01 fw sshd[1078]: Failed password for root from 141.98.10.78 port 43122 ssh2
+Jan 06 07:00:03 fw sshd[1078]: Failed password for root from 141.98.10.78 port 43123 ssh2
+Jan 06 07:00:05 fw sshd[1078]: Failed password for root from 141.98.10.78 port 43124 ssh2
+ 
+Jan 06 07:01:20 fw kernel: IN=em0 OUT= MAC= SRC=23.129.64.12 DST=192.168.1.15 LEN=60
+Jan 06 07:01:22 fw kernel: IN=em0 OUT= MAC= SRC=23.129.64.12 DST=192.168.1.15 LEN=60
+ 
+Jan 06 07:02:10 fw nginx: 54.36.148.91 - - "GET /admin HTTP/1.1" 401 98 "-" "curl/7.68.0"
+Jan 06 07:02:11 fw nginx: 54.36.148.91 - - "GET /.env HTTP/1.1" 404 72 "-" "curl/7.68.0"
+Jan 06 07:02:12 fw nginx: 54.36.148.91 - - "GET /config.php HTTP/1.1" 404 72 "-" "curl/7.68.0"
+ 
+Jan 06 07:03:00 fw sshd[1120]: Accepted password for jimmy from 192.168.1.50 port 53421 ssh2
+Jan 06 07:03:30 fw sshd[1120]: Accepted password for backup from 10.0.0.12 port 42311 ssh2
+ 
+Jan 06 07:04:01 fw kernel: IN=em0 OUT= MAC= SRC=62.210.90.12 DST=192.168.1.100 LEN=60
+Jan 06 07:04:02 fw kernel: IN=em0 OUT= MAC= SRC=62.210.90.12 DST=192.168.1.100 LEN=60
+Jan 06 07:04:03 fw kernel: IN=em0 OUT= MAC= SRC=62.210.90.12 DST=192.168.1.100 LEN=60
+ 
+Jan 06 07:05:10 fw sshd[1199]: Failed password for invalid user test from 91.240.118.44 port 49832 ssh2
+Jan 06 07:05:12 fw sshd[1199]: Failed password for invalid user test from 91.240.118.44 port 49833 ssh2
+Jan 06 07:05:14 fw sshd[1199]: Failed password for invalid user test from 91.240.118.44 port 49834 ssh2
+ 
+Jan 06 07:06:00 fw nginx: 66.249.66.1 - - "GET / HTTP/1.1" 200 512 "-" "Googlebot"
+Jan 06 07:06:02 fw nginx: 66.249.66.1 - - "GET /robots.txt HTTP/1.1" 200 68 "-" "Googlebot"
+ 
+Jan 06 07:07:20 fw kernel: IN=em0 OUT= MAC= SRC=5.188.206.18 DST=192.168.1.200 LEN=60
+Jan 06 07:07:22 fw kernel: IN=em0 OUT= MAC= SRC=5.188.206.18 DST=192.168.1.200 LEN=60
+Jan 06 07:07:24 fw kernel: IN=em0 OUT= MAC= SRC=5.188.206.18 DST=192.168.1.200 LEN=60
+ 
+Jan 06 07:08:01 fw sshd[1301]: Failed password for root from 193.32.162.66 port 60221 ssh2
+Jan 06 07:08:03 fw sshd[1301]: Failed password for root from 193.32.162.66 port 60222 ssh2
+Jan 06 07:08:05 fw sshd[1301]: Failed password for root from 193.32.162.66 port 60223 ssh2
